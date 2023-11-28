@@ -5,7 +5,7 @@ use concordium_std::{collections::*, *};
 use core::fmt::Debug;
 
 #[derive(Serialize, SchemaType, Clone)]
-struct InitiliseParams{
+struct InitialiseParams{
     timeout : Timestamp,
 
     #[concordium(size_length = 2)]
@@ -14,10 +14,11 @@ struct InitiliseParams{
     min_signers_req: u16
 }
 /// Your smart contract state.
-#[derive(Serial, DeserialWithState)]
+#[derive(Serial, SchemaType, DeserialWithState)]
 #[concordium(state_parameter = "St")]
-pub struct State<St> {
-    init_params: InitiliseParams,
+pub struct State<St>{
+    // Arguments initialising the smart contract
+    init_params: InitialiseParams,
 
     requests: StateMap<RequestId, Request, St>
     // Your state
@@ -46,16 +47,35 @@ pub enum Error {
     /// Failed parsing the parameter.
     #[from(ParseError)]
     ParseParams,
-    /// Your error
-    YourError,
+    // Accounts must be minimum of 3
+    IncompleteAccounts,
+    // Three accounts must be in support at any given time for transfer to be made else an error is thrown
+    // min_signers_req must be equal or less than total accounts 
+    AccountsLessThanSupportNeeded
+}
+
+pub enum ErrorOnReceive{
+    NotReceived
 }
 
 /// Init function that creates a new smart contract.
-#[init(contract = "multi_sig")]
-fn init(_ctx: &InitContext, _state_builder: &mut StateBuilder) -> InitResult<State> {
+#[init(contract = "multi_sig", parameter = "InitialiseParams", payable)]
+fn init<St: HasStateApi>(_ctx: &InitContext, amount: Amount, _state_builder: &mut StateBuilder<St>) -> Result<State<St>, Error> {
     // Your code
+    let parameter: InitialiseParams = match _ctx.parameter_cursor().get(){
+        Ok(parameter) => parameter,
+        Err(_) => return Err(Reject::default()),
+    };
+    ensure!(parameter.min_signers_req <= parameter.signers.len() as u16, Error::AccountsLessThanSupportNeeded);
 
-    Ok(State {})
+    ensure!(parameter.signers.len() >= 3, Error::IncompleteAccounts);
+
+    let state = State {
+        init_params: parameter,
+        requests: _state_builder.new_map(),
+    };
+
+    Ok(state)
 }
 
 /// Receive function. The input parameter is the boolean variable `throw_error`.
@@ -64,19 +84,13 @@ fn init(_ctx: &InitContext, _state_builder: &mut StateBuilder) -> InitResult<Sta
 #[receive(
     contract = "multi_sig",
     name = "receive",
-    parameter = "MyInputType",
     error = "Error",
-    mutable
+    payable
 )]
-fn receive(ctx: &ReceiveContext, _host: &mut Host<State>) -> Result<(), Error> {
+#[inline(always)]
+fn receive<St: HasStateApi>(ctx: &ReceiveContext, amount: Amount, _host: &mut Host<State<St>>) -> Result<(), Error> {
     // Your code
-
-    let throw_error = ctx.parameter_cursor().get()?; // Returns Error::ParseError on failure
-    if throw_error {
-        Err(Error::YourError)
-    } else {
         Ok(())
-    }
 }
 
 /// View function that returns the content of the state.

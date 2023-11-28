@@ -6,12 +6,12 @@ use concordium_std::{collections::*, *};
 use core::fmt::Debug;
 
 #[derive(Serialize, SchemaType, Clone)]
-struct InitialiseParams{
-    timeout : Duration,
+pub struct InitialiseParams{
+    pub timeout : Duration,
     #[concordium(size_length = 2)]
-    signers: BTreeSet<AccountAddress>,
+    pub signers: BTreeSet<AccountAddress>,
 
-    min_signers_req: u16
+    pub min_signers_req: u16
 }
 /// Your smart contract state.
 #[derive(Serial, DeserialWithState)]
@@ -38,8 +38,8 @@ type CustomisedResult<T> = Result<T, ErrorOnReceive>;
 
 #[derive(Serialize, SchemaType)]
 pub enum RequestAction {
-    SeekTransfer(Amount, AccountAddress, RequestId),
-    AcceptTransfer(Amount, AccountAddress, RequestId),
+     SeekTransfer(Amount, AccountAddress, RequestId),
+     AcceptTransfer(Amount, AccountAddress, RequestId),
 }
 
 /// Your smart contract errors.
@@ -87,8 +87,14 @@ fn init<St: HasStateApi>(_ctx: &InitContext, _state_builder: &mut StateBuilder<S
 
     ensure!(parameter.signers.len() >= 3, Error::IncompleteAccounts);
 
+    let params = InitialiseParams{
+        timeout: parameter.timeout,
+        signers: parameter.signers,
+        min_signers_req: parameter.min_signers_req
+    };
+
     let state = State {
-        init_params: parameter,
+        init_params: params.clone(),
         requests: _state_builder.new_map(),
     };
 

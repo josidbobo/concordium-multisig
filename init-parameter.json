@@ -1,9 +1,9 @@
 {
-    "timeout": 40,
+    "timeout": "540ms",
     "signers": [
         "4JsggRnKuEV7zHpV1a2xMkKSu7aizuY9GeYPd5AjT88RzyC9Yh", 
         "2zWWN43WFWZmGzVFKpP4c1HKGntnrn6ekw9Rd6pAvtQiq7hizV",
         "3qP8Z76F2UCRKkuoD1qWrvnRR9RvpTLw8bw1CCY6mpdSLi6DNo"
     ],
-    "min_signers_reg": 3
+    "min_signers_reg": "3"
 }

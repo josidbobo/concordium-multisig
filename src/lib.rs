@@ -190,7 +190,7 @@ match ozi {
             ensure!(!match_req.accounts_in_aggrement.contains(&valid_address), ErrorOnReceive::AlreadyExists);
 
             match_req.accounts_in_aggrement.insert(valid_address);
-            match_req.accounts_in_aggrement.len() >= usize::from(min_required_support);
+            ensure!(match_req.accounts_in_aggrement.len() >= usize::from(min_required_support), ErrorOnReceive::Overflow);
         };
         if receipt == () {
             host.invoke_transfer(&recipient_account, amut)?;

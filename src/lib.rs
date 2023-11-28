@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 //! # A Concordium V1 smart contract
-use concordium_smart_contract_testing::Transfer;
+//use concordium_smart_contract_testing::Transfer;
 use concordium_std::{collections::*, *};
 use core::fmt::Debug;
 
@@ -121,7 +121,7 @@ fn deposit<St: HasStateApi>(ctx: &ReceiveContext, _host: &impl HasHost<State<St>
 
 /// Receive function that returns the status of the state.
 #[receive(contract = "multi_sig", mutable, name = "receive", payable, error = "ErrorOnReceive", parameter = "RequestAction")]
-fn message<St: HasStateApi>(_ctx: &ReceiveContext, host: &impl HasHost<State<St>, StateApiType = St>, amount: Amount) -> CustomisedResult<()> {
+fn message<St: HasStateApi>(_ctx: &ReceiveContext, host: &mut impl HasHost<State<St>, StateApiType = St>, amount: Amount) -> CustomisedResult<()> {
 let sender = _ctx.sender();
 
 // Get info on the interating address if its a contract or user Account
@@ -163,7 +163,7 @@ match ozi {
 
         let balance = amount + host.self_balance();
         ensure!(
-            balance - balance_reserved >= transfer_amount,
+            balance >= transfer_amount,
             ErrorOnReceive::InsufficientBalance
         );
 
@@ -183,12 +183,21 @@ match ozi {
     }
 
     RequestAction::AcceptTransfer(amut, recipient_account, idd) => {
-        let transfer = {
-            let 
+        let receipt = {
+            let min_required_support = host.state().init_params.min_signers_req;
+            let mut match_req = host.state_mut().requests.entry(idd).occupied_or(ErrorOnReceive::ParseParams)?;
+            ensure!(match_req.expiry > now, ErrorOnReceive::TimedOut);
+            ensure!(!match_req.accounts_in_aggrement.contains(&valid_address), ErrorOnReceive::AlreadyExists);
+
+            match_req.accounts_in_aggrement.insert(valid_address);
+            match_req.accounts_in_aggrement.len() >= usize::from(min_required_support);
+        };
+        if receipt == () {
+            host.invoke_transfer(&recipient_account, amut)?;
+            host.state_mut().requests.remove(&idd);
         }
+        Ok(())
     }
-
-
 }
 
 }

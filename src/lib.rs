@@ -4,16 +4,30 @@
 use concordium_std::{collections::*, *};
 use core::fmt::Debug;
 
+#[derive(Serialize, SchemaType, Clone)]
+struct InitiliseParams{
+    timeout : Timestamp,
+
+    #[concordium(size_length = 2)]
+    signers: BTreeSet<AccountAddress>,
+
+    min_signers_req: u16
+}
 /// Your smart contract state.
-#[derive(Serialize, SchemaType)]
-pub struct State {
+#[derive(Serial, DeserialWithState)]
+#[concordium(state_parameter = "St")]
+pub struct State<St> {
+    init_params: InitiliseParams,
+
+    requests: StateMap<RequestId, Request, St>
     // Your state
 }
 
 #[derive(Clone, Serialize, SchemaType)]
 pub struct Request{
     pub amount: Amount,
-    pub in_aggrement: BTreeSet<AccountAddress>,
+    pub sender_account: AccountAddress,
+    pub accounts_in_aggrement: BTreeSet<AccountAddress>,
     pub receiver: AccountAddress,
     pub expiry: Timestamp
 }

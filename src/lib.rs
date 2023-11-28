@@ -77,7 +77,7 @@ pub enum ErrorOnReceive{
 
 /// Init function that creates a new smart contract.
 #[init(contract = "multi_sig", parameter = "InitialiseParams", payable)]
-fn init<St: HasStateApi>(_ctx: &InitContext, _state_builder: &mut StateBuilder<St>, amount: Amount,) -> Result<State<St>, Error> {
+fn init<St: HasStateApi>(_ctx: &InitContext, _state_builder: &mut StateBuilder<St>, _amount: Amount,) -> Result<State<St>, Error> {
     // Your code
     let parameter: InitialiseParams = match _ctx.parameter_cursor().get(){
         Ok(parameter) => parameter,
@@ -114,7 +114,7 @@ impl From<TransferError> for ErrorOnReceive {
     payable
 )]
 //#[inline(always)]
-fn deposit<St: HasStateApi>(ctx: &ReceiveContext, _host: &impl HasHost<State<St>, StateApiType = St>, amount: Amount,) -> Result<(), Error> {
+fn deposit<St: HasStateApi>(_ctx: &ReceiveContext, _host: &impl HasHost<State<St>, StateApiType = St>, _amount: Amount,) -> Result<(), Error> {
     // Your code
         Ok(())
 }
@@ -183,8 +183,9 @@ match ozi {
     }
 
     RequestAction::AcceptTransfer(amut, recipient_account, idd) => {
+        let min_required_support = host.state().init_params.min_signers_req;
+
         let receipt = {
-            let min_required_support = host.state().init_params.min_signers_req;
             let mut match_req = host.state_mut().requests.entry(idd).occupied_or(ErrorOnReceive::ParseParams)?;
             ensure!(match_req.expiry > now, ErrorOnReceive::TimedOut);
             ensure!(!match_req.accounts_in_aggrement.contains(&valid_address), ErrorOnReceive::AlreadyExists);

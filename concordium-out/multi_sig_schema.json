@@ -1,0 +1,15 @@
+{
+  "contractName": "multi_sig",
+  "entrypoints": {
+    "deposit": {
+      "error": "FQMAAAALAAAAUGFyc2VQYXJhbXMCEgAAAEluY29tcGxldGVBY2NvdW50cwIdAAAAQWNjb3VudHNMZXNzVGhhblN1cHBvcnROZWVkZWQC"
+    },
+    "receive": {
+      "error": "FQgAAAALAAAAUGFyc2VQYXJhbXMCFAAAAE5vdFJlZ2lzdGVyZWRBY2NvdW50AggAAABUaW1lZE91dAIQAAAASW52YWxpZFJlY2lwaWVudAINAAAAQWxyZWFkeUV4aXN0cwITAAAASW5zdWZmaWNpZW50QmFsYW5jZQIOAAAATm90VXNlckFjY291bnQCCAAAAE92ZXJmbG93Ag==",
+      "parameter": "FQIAAAAMAAAAU2Vla1RyYW5zZmVyAQMAAAAKCwUOAAAAQWNjZXB0VHJhbnNmZXIBAwAAAAoLBQ=="
+    }
+  },
+  "init": {
+    "parameter": "FAADAAAABwAAAHRpbWVvdXQOBwAAAHNpZ25lcnMRAQsPAAAAbWluX3NpZ25lcnNfcmVxAw=="
+  }
+}

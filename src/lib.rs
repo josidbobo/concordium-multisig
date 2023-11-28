@@ -119,6 +119,43 @@ fn deposit<St: HasStateApi>(_ctx: &ReceiveContext, _host: &impl HasHost<State<St
         Ok(())
 }
 
+// Function to enable the owner of the request to cancel as long as the time hasn't elapsed
+#[receive(
+    contract = "multi_sig",
+    name = "cancel",
+    error = "Error",
+    mutable
+)]
+//#[inline(always)]
+fn cancel_request<St: HasStateApi>(_ctx: &ReceiveContext, _host: &mut impl HasHost<State<St>, StateApiType = St>,) -> Result<(), Error> {
+    // Your code
+    let sender = _ctx.sender();
+    let address = match sender{
+        Address::Contract(_) => panic!("Must not be a contract address"),
+        Address::Account(address) => address,
+    };
+
+    let current_time = _ctx.metadata().slot_time();
+    let mut found : bool = false;
+    let mut id = 0;
+    
+    for(y, q) in _host.state().requests.iter() {
+        if q.expiry > current_time && q.sender_account == address{
+            found = true;
+            id = *y;
+            break;
+        }
+    }
+    if found == true{
+        _host.state_mut().requests.remove(&id);
+        Ok(())
+    } else{
+        Err(Error::ParseParams)
+    }
+        
+}
+
+
 /// Receive function that returns the status of the state.
 #[receive(contract = "multi_sig", mutable, name = "receive", payable, error = "ErrorOnReceive", parameter = "RequestAction")]
 fn message<St: HasStateApi>(_ctx: &ReceiveContext, host: &mut impl HasHost<State<St>, StateApiType = St>, amount: Amount) -> CustomisedResult<()> {

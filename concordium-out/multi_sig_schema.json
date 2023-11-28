@@ -1,6 +1,9 @@
 {
   "contractName": "multi_sig",
   "entrypoints": {
+    "cancel": {
+      "error": "FQMAAAALAAAAUGFyc2VQYXJhbXMCEgAAAEluY29tcGxldGVBY2NvdW50cwIdAAAAQWNjb3VudHNMZXNzVGhhblN1cHBvcnROZWVkZWQC"
+    },
     "deposit": {
       "error": "FQMAAAALAAAAUGFyc2VQYXJhbXMCEgAAAEluY29tcGxldGVBY2NvdW50cwIdAAAAQWNjb3VudHNMZXNzVGhhblN1cHBvcnROZWVkZWQC"
     },

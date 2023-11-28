@@ -1,5 +1,5 @@
 ## Concordium Mulitisig contract
-This contract depicts a multi-signatory functionality whereby a minimum of three account holders can sign/permit a transaction out of the contract but anyone can send tokens into it.
+This smart contract depicts a multi-signatory functionality on Concordium blockchain where a minimum of three account holders must sign/permit a transaction out of the contract but anyone can send tokens into it.
 
 
 ### ScreenShots  
